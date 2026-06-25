@@ -53,7 +53,9 @@ export default async function AdminPage() {
           </p>
           <h1 className="font-serif text-2xl font-semibold text-foreground">
             {withContent.length}{' '}
-            {withContent.length === 1 ? 'mensaje' : 'mensajes'} recopilados
+            {withContent.length === 1
+              ? 'mensaje recopilado'
+              : 'mensajes recopilados'}
           </h1>
         </div>
         <div className="flex items-center gap-2">
@@ -82,7 +84,7 @@ export default async function AdminPage() {
           </CardContent>
         </Card>
       ) : (
-        <AlbumBook entries={withContent} />
+        <AlbumBook entries={withContent} canDelete />
       )}
     </main>
   )

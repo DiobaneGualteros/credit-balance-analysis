@@ -1,10 +1,12 @@
 'use client'
 
+import { deleteEntry } from '@/app/actions'
 import type { Entry } from '@/lib/db/schema'
 import { COLOR_DEFAULT, fontFamily } from '@/lib/estilos'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Loader2, Trash2 } from 'lucide-react'
 import dynamic from 'next/dynamic'
-import { forwardRef, useEffect, useRef, useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { forwardRef, useEffect, useRef, useState, useTransition } from 'react'
 
 // react-pageflip touches the DOM, so load it client-side only
 const HTMLFlipBook = dynamic(() => import('react-pageflip'), { ssr: false })
@@ -26,17 +28,60 @@ const Page = forwardRef<HTMLDivElement, PageProps>(function Page(
   return (
     <div
       ref={ref}
-      className={`paper-page flex h-full w-full flex-col overflow-hidden border border-border ${className}`}
+      className={`album-leaf flex h-full w-full flex-col overflow-hidden ${className}`}
     >
       {children}
     </div>
   )
 })
 
-function EntryPage({ entry, index }: { entry: Entry; index: number }) {
+const Cover = forwardRef<HTMLDivElement, PageProps>(function Cover(
+  { children, className = '' },
+  ref,
+) {
   return (
-    <div className="flex h-full flex-col p-8">
-      <div className="mb-4 border-b border-border pb-3">
+    <div
+      ref={ref}
+      data-density="hard"
+      className={`album-cover flex h-full w-full flex-col overflow-hidden ${className}`}
+    >
+      {children}
+    </div>
+  )
+})
+
+function EntryContent({
+  entry,
+  index,
+  canDelete,
+  onDelete,
+  deleting,
+}: {
+  entry: Entry
+  index: number
+  canDelete?: boolean
+  onDelete?: (id: number) => void
+  deleting?: boolean
+}) {
+  return (
+    <div className="relative flex h-full flex-col p-7 sm:p-8">
+      {canDelete && (
+        <button
+          type="button"
+          onClick={() => onDelete?.(entry.id)}
+          disabled={deleting}
+          className="absolute right-3 top-3 z-10 flex items-center gap-1 rounded-full border border-destructive/30 bg-card/90 px-2.5 py-1 text-xs font-medium text-destructive shadow-sm transition-colors hover:bg-destructive hover:text-card disabled:opacity-50"
+          aria-label={`Eliminar la página de ${entry.nombre}`}
+        >
+          {deleting ? (
+            <Loader2 className="size-3.5 animate-spin" />
+          ) : (
+            <Trash2 className="size-3.5" />
+          )}
+          Borrar
+        </button>
+      )}
+      <div className="mb-4 border-b border-accent/40 pb-3">
         <p className="text-xs uppercase tracking-wider text-primary">
           Mensaje {index + 1}
         </p>
@@ -72,17 +117,32 @@ function EntryPage({ entry, index }: { entry: Entry; index: number }) {
   )
 }
 
-export function AlbumBook({ entries }: { entries: Entry[] }) {
-  const bookRef = useRef<{ pageFlip: () => { flipNext: () => void; flipPrev: () => void } } | null>(
-    null,
-  )
-  const [size, setSize] = useState({ width: 420, height: 560 })
+export function AlbumBook({
+  entries,
+  canDelete = false,
+}: {
+  entries: Entry[]
+  canDelete?: boolean
+}) {
+  const router = useRouter()
+  const bookRef = useRef<{
+    pageFlip: () => { flipNext: () => void; flipPrev: () => void }
+  } | null>(null)
+  const [size, setSize] = useState({ width: 400, height: 540 })
+  const [portrait, setPortrait] = useState(false)
+  const [isPending, startTransition] = useTransition()
+  const [deletingId, setDeletingId] = useState<number | null>(null)
 
   useEffect(() => {
     function update() {
-      const w = Math.min(window.innerWidth - 48, 460)
-      const width = Math.max(280, w)
-      setSize({ width, height: Math.round(width * 1.33) })
+      const isMobile = window.innerWidth < 768
+      const available = window.innerWidth - 56
+      // Two-page spread on desktop, single page on mobile.
+      const width = isMobile
+        ? Math.min(440, Math.max(280, available))
+        : Math.min(440, Math.max(300, Math.floor(available / 2)))
+      setPortrait(isMobile)
+      setSize({ width, height: Math.round(width * 1.35) })
     }
     update()
     window.addEventListener('resize', update)
@@ -96,26 +156,41 @@ export function AlbumBook({ entries }: { entries: Entry[] }) {
     bookRef.current?.pageFlip()?.flipPrev()
   }
 
+  function handleDelete(id: number) {
+    if (!window.confirm('¿Seguro que deseas eliminar esta página del álbum?')) {
+      return
+    }
+    setDeletingId(id)
+    startTransition(async () => {
+      await deleteEntry(id)
+      setDeletingId(null)
+      router.refresh()
+    })
+  }
+
   return (
     <div className="flex flex-col items-center gap-6">
-      <div className="album-shadow rounded-lg">
+      <div className="book-mount">
         {/* @ts-expect-error react-pageflip types are loose */}
         <HTMLFlipBook
+          key={portrait ? 'portrait' : 'landscape'}
           ref={bookRef}
           width={size.width}
           height={size.height}
           size="fixed"
           minWidth={280}
-          maxWidth={460}
+          maxWidth={440}
           minHeight={400}
           maxHeight={620}
           showCover
-          maxShadowOpacity={0.4}
+          usePortrait={portrait}
+          drawShadow
+          maxShadowOpacity={0.5}
           mobileScrollSupport
           className="page-flip-book"
         >
-          {/* Cover */}
-          <Page className="items-center justify-center bg-primary text-primary-foreground">
+          {/* Front cover */}
+          <Cover>
             <div className="flex h-full flex-col items-center justify-center p-10 text-center">
               <p className="text-sm uppercase tracking-widest text-accent">
                 Con cariño
@@ -128,17 +203,23 @@ export function AlbumBook({ entries }: { entries: Entry[] }) {
                 Mensajes y recuerdos de quienes te acompañaron en este camino.
               </p>
             </div>
-          </Page>
+          </Cover>
 
           {/* Entries */}
           {entries.map((entry, i) => (
             <Page key={entry.id}>
-              <EntryPage entry={entry} index={i} />
+              <EntryContent
+                entry={entry}
+                index={i}
+                canDelete={canDelete}
+                onDelete={handleDelete}
+                deleting={isPending && deletingId === entry.id}
+              />
             </Page>
           ))}
 
           {/* Back cover */}
-          <Page className="items-center justify-center bg-primary text-primary-foreground">
+          <Cover>
             <div className="flex h-full flex-col items-center justify-center p-10 text-center">
               <h2 className="font-serif text-2xl font-bold text-primary-foreground">
                 ¡Feliz jubilación!
@@ -147,7 +228,7 @@ export function AlbumBook({ entries }: { entries: Entry[] }) {
                 Gracias por tantos años de dedicación.
               </p>
             </div>
-          </Page>
+          </Cover>
         </HTMLFlipBook>
       </div>
 

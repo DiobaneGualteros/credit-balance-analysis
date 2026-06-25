@@ -138,3 +138,26 @@ export async function getAllEntries(): Promise<Entry[]> {
   if (!(await isAdmin())) return []
   return db.select().from(entries).orderBy(desc(entries.createdAt))
 }
+
+export async function deleteEntry(id: number) {
+  if (!(await isAdmin())) return { error: 'No autorizado.' }
+
+  const rows = await db.select().from(entries).where(eq(entries.id, id)).limit(1)
+  const entry = rows[0]
+  if (!entry) return { error: 'No se encontró la página.' }
+
+  // Remove the participant's photos from blob storage
+  for (const pathname of entry.fotos ?? []) {
+    try {
+      await del(pathname)
+    } catch {
+      // ignore blob deletion errors
+    }
+  }
+
+  await db.delete(entries).where(eq(entries.id, id))
+
+  revalidatePath('/admin')
+  revalidatePath('/admin/imprimir')
+  return { success: true }
+}
