@@ -5,7 +5,8 @@ import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import type { Entry } from '@/lib/db/schema'
-import { ImagePlus, Loader2, Trash2 } from 'lucide-react'
+import { fraseAleatoria } from '@/lib/frases'
+import { ImagePlus, Loader2, Quote, RefreshCw, Sparkles, Trash2 } from 'lucide-react'
 import Image from 'next/image'
 import { useRef, useState, useTransition } from 'react'
 
@@ -20,7 +21,15 @@ export function MessageEditor({ entry }: { entry: Entry }) {
   const [status, setStatus] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [isSaving, startSaving] = useTransition()
+  const [frase, setFrase] = useState(() => fraseAleatoria())
   const inputRef = useRef<HTMLInputElement>(null)
+
+  function usarFrase() {
+    setMensaje((prev) => {
+      const limpio = prev.trim()
+      return limpio.length === 0 ? frase : `${limpio}\n\n${frase}`
+    })
+  }
 
   async function handleFiles(files: FileList | null) {
     if (!files || files.length === 0) return
@@ -83,6 +92,32 @@ export function MessageEditor({ entry }: { entry: Entry }) {
           placeholder="Querido(a)... Quiero agradecerte por todos estos años..."
           className="min-h-64 resize-y border-none bg-transparent font-serif text-lg leading-relaxed shadow-none focus-visible:ring-0"
         />
+
+        {/* Suggested phrase to help the writer */}
+        <div className="mt-6 rounded-xl border border-accent/40 bg-accent/10 p-4">
+          <div className="flex items-center gap-2 text-sm font-medium text-accent-foreground">
+            <Sparkles className="size-4" />
+            Frase para ayudarte
+          </div>
+          <p className="mt-2 flex gap-2 font-serif text-base italic leading-relaxed text-foreground">
+            <Quote className="mt-1 size-4 shrink-0 text-accent-foreground/60" />
+            <span>{frase}</span>
+          </p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <Button type="button" size="sm" onClick={usarFrase}>
+              Usar esta frase
+            </Button>
+            <Button
+              type="button"
+              size="sm"
+              variant="ghost"
+              onClick={() => setFrase((actual) => fraseAleatoria(actual))}
+            >
+              <RefreshCw className="size-4" />
+              Ver otra
+            </Button>
+          </div>
+        </div>
       </div>
 
       {/* Photos */}
