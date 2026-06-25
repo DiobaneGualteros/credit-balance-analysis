@@ -281,5 +281,14 @@
   .print-page {
     page-break-after: always;
     break-after: page;
+    box-shadow: none !important;
+  }
+  /* Preserve background colors and decorative frames when printing */
+  .album-cover,
+  .album-sheet,
+  .album-sheet::before,
+  .album-cover::after {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
   }
 }

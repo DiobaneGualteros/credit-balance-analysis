@@ -2,6 +2,7 @@ import { getAllEntries } from '@/app/actions'
 import { PrintButton } from '@/components/print-button'
 import { COLOR_DEFAULT, fontFamily } from '@/lib/estilos'
 import { isAdmin } from '@/lib/session'
+import { Feather } from 'lucide-react'
 import { redirect } from 'next/navigation'
 
 function fileUrl(pathname: string) {
@@ -26,34 +27,44 @@ export default async function ImprimirPage() {
         <PrintButton />
       </div>
 
-      {/* Cover */}
-      <section className="print-page flex min-h-[60vh] flex-col items-center justify-center rounded-2xl border border-border bg-primary p-12 text-center text-primary-foreground">
-        <p className="text-sm uppercase tracking-widest text-accent">
-          Con cariño
-        </p>
-        <h1 className="mt-4 font-serif text-4xl font-bold text-primary-foreground text-balance">
-          Álbum de Jubilación
-        </h1>
-        <div className="mt-6 h-px w-20 bg-accent" />
-        <p className="mt-6 max-w-md text-primary-foreground/80 text-pretty">
-          Mensajes y recuerdos de quienes te acompañaron en este camino.
-        </p>
+      {/* Cover — hard cover with gold frame, like the book */}
+      <section className="print-page album-cover flex min-h-[70vh] flex-col items-center justify-center rounded-2xl p-12 text-center album-shadow">
+        <div className="relative z-10 flex flex-col items-center">
+          <p className="text-sm uppercase tracking-[0.3em] text-accent">
+            Con cariño
+          </p>
+          <Feather className="mt-6 size-8 text-accent" />
+          <h1 className="mt-4 font-serif text-5xl font-bold text-primary-foreground text-balance">
+            Álbum de Jubilación
+          </h1>
+          <div className="mt-6 h-px w-24 bg-accent" />
+          <p className="mt-6 max-w-md text-primary-foreground/85 text-pretty">
+            Mensajes y recuerdos de quienes te acompañaron en este camino.
+          </p>
+        </div>
       </section>
 
-      {/* Entries */}
+      {/* Entries — framed paper leaves */}
       {withContent.map((entry, i) => (
         <article
           key={entry.id}
-          className="print-page mt-8 rounded-2xl border border-border bg-card p-8"
+          className="print-page album-sheet mt-8 rounded-2xl border border-border p-10 album-shadow"
         >
-          <header className="mb-4 border-b border-border pb-3">
-            <p className="text-xs uppercase tracking-wider text-primary">
-              Mensaje {i + 1}
+          {/* Decorative header */}
+          <header className="mb-6 flex flex-col items-center text-center">
+            <div className="flex w-full items-center justify-center gap-3">
+              <span className="h-px w-12 bg-accent/70 sm:w-20" />
+              <Feather className="size-5 text-accent-foreground" />
+              <span className="h-px w-12 bg-accent/70 sm:w-20" />
+            </div>
+            <p className="mt-3 text-xs uppercase tracking-wider text-primary">
+              Página {i + 1}
             </p>
             <h2 className="font-serif text-2xl font-semibold text-foreground">
               {entry.nombre}
             </h2>
           </header>
+
           <p
             className="whitespace-pre-wrap text-base leading-relaxed"
             style={{
@@ -63,6 +74,7 @@ export default async function ImprimirPage() {
           >
             {entry.mensaje || 'Sin mensaje escrito.'}
           </p>
+
           {entry.fotos && entry.fotos.length > 0 && (
             <div className="mt-6 grid grid-cols-2 gap-3">
               {entry.fotos.map((p) => (
@@ -79,14 +91,17 @@ export default async function ImprimirPage() {
         </article>
       ))}
 
-      {/* Back cover */}
-      <section className="print-page mt-8 flex min-h-[40vh] flex-col items-center justify-center rounded-2xl border border-border bg-primary p-12 text-center text-primary-foreground">
-        <h2 className="font-serif text-3xl font-bold text-primary-foreground">
-          ¡Feliz jubilación!
-        </h2>
-        <p className="mt-4 text-primary-foreground/80 text-pretty">
-          Gracias por tantos años de dedicación.
-        </p>
+      {/* Back cover — hard cover with gold frame */}
+      <section className="print-page album-cover mt-8 flex min-h-[50vh] flex-col items-center justify-center rounded-2xl p-12 text-center album-shadow">
+        <div className="relative z-10 flex flex-col items-center">
+          <h2 className="font-serif text-4xl font-bold text-primary-foreground">
+            ¡Feliz jubilación!
+          </h2>
+          <div className="mt-5 h-px w-20 bg-accent" />
+          <p className="mt-5 text-primary-foreground/85 text-pretty">
+            Gracias por tantos años de dedicación.
+          </p>
+        </div>
       </section>
     </main>
   )
