@@ -5,10 +5,10 @@ import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import type { Entry } from '@/lib/db/schema'
-import { fraseAleatoria } from '@/lib/frases'
+import { FRASES_JUBILACION, fraseAleatoria } from '@/lib/frases'
 import { ImagePlus, Loader2, Quote, RefreshCw, Sparkles, Trash2 } from 'lucide-react'
 import Image from 'next/image'
-import { useRef, useState, useTransition } from 'react'
+import { useEffect, useRef, useState, useTransition } from 'react'
 
 function fileUrl(pathname: string) {
   return `/api/file?pathname=${encodeURIComponent(pathname)}`
@@ -21,8 +21,13 @@ export function MessageEditor({ entry }: { entry: Entry }) {
   const [status, setStatus] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [isSaving, startSaving] = useTransition()
-  const [frase, setFrase] = useState(() => fraseAleatoria())
+  const [frase, setFrase] = useState(FRASES_JUBILACION[0])
   const inputRef = useRef<HTMLInputElement>(null)
+
+  // Randomize the phrase only on the client to avoid SSR hydration mismatch.
+  useEffect(() => {
+    setFrase(fraseAleatoria())
+  }, [])
 
   function usarFrase() {
     setMensaje((prev) => {
@@ -77,30 +82,16 @@ export function MessageEditor({ entry }: { entry: Entry }) {
 
   return (
     <div className="flex flex-col gap-6">
-      {/* The blank sheet */}
+      {/* The blank sheet: message + photos together on the same page */}
       <div className="paper-page rounded-2xl border border-border p-6 album-shadow sm:p-10">
-        <Label
-          htmlFor="mensaje"
-          className="mb-3 block font-serif text-lg text-foreground"
-        >
-          Escribe tu mensaje
-        </Label>
-        <Textarea
-          id="mensaje"
-          value={mensaje}
-          onChange={(e) => setMensaje(e.target.value)}
-          placeholder="Querido(a)... Quiero agradecerte por todos estos años..."
-          className="min-h-64 resize-y border-none bg-transparent font-serif text-lg leading-relaxed shadow-none focus-visible:ring-0"
-        />
-
         {/* Suggested phrase to help the writer */}
-        <div className="mt-6 rounded-xl border border-accent/40 bg-accent/10 p-4">
-          <div className="flex items-center gap-2 text-sm font-medium text-accent-foreground">
+        <div className="mb-6 rounded-xl border-2 border-accent bg-accent/30 p-4">
+          <div className="flex items-center gap-2 text-sm font-semibold text-accent-foreground">
             <Sparkles className="size-4" />
             Frase para ayudarte
           </div>
-          <p className="mt-2 flex gap-2 font-serif text-base italic leading-relaxed text-foreground">
-            <Quote className="mt-1 size-4 shrink-0 text-accent-foreground/60" />
+          <p className="mt-2 flex gap-2 font-serif text-lg italic leading-relaxed text-foreground">
+            <Quote className="mt-1 size-5 shrink-0 text-accent-foreground" />
             <span>{frase}</span>
           </p>
           <div className="mt-3 flex flex-wrap gap-2">
@@ -110,7 +101,7 @@ export function MessageEditor({ entry }: { entry: Entry }) {
             <Button
               type="button"
               size="sm"
-              variant="ghost"
+              variant="secondary"
               onClick={() => setFrase((actual) => fraseAleatoria(actual))}
             >
               <RefreshCw className="size-4" />
@@ -118,67 +109,83 @@ export function MessageEditor({ entry }: { entry: Entry }) {
             </Button>
           </div>
         </div>
-      </div>
 
-      {/* Photos */}
-      <div className="rounded-2xl border border-border bg-card p-6">
-        <div className="flex items-center justify-between">
-          <h3 className="font-serif text-lg text-foreground">Tus fotos</h3>
-          <input
-            ref={inputRef}
-            type="file"
-            accept="image/*"
-            multiple
-            className="hidden"
-            onChange={(e) => handleFiles(e.target.files)}
-          />
-          <Button
-            type="button"
-            variant="secondary"
-            onClick={() => inputRef.current?.click()}
-            disabled={uploading}
-          >
-            {uploading ? (
-              <Loader2 className="size-4 animate-spin" />
-            ) : (
-              <ImagePlus className="size-4" />
-            )}
-            {uploading ? 'Subiendo…' : 'Agregar fotos'}
-          </Button>
-        </div>
+        <Label
+          htmlFor="mensaje"
+          className="mb-2 block font-serif text-lg text-foreground"
+        >
+          Escribe tu mensaje aquí
+        </Label>
+        <Textarea
+          id="mensaje"
+          value={mensaje}
+          onChange={(e) => setMensaje(e.target.value)}
+          placeholder="Querido(a)... Quiero agradecerte por todos estos años..."
+          className="min-h-64 resize-y rounded-lg border border-border bg-card/80 p-4 font-serif text-lg leading-relaxed text-foreground shadow-inner focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/40"
+        />
 
-        {fotos.length === 0 ? (
-          <p className="mt-4 text-sm text-muted-foreground">
-            Aún no has agregado fotos. Son opcionales, pero hacen el recuerdo más
-            especial.
-          </p>
-        ) : (
-          <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
-            {fotos.map((pathname) => (
-              <div
-                key={pathname}
-                className="group relative aspect-square overflow-hidden rounded-lg border border-border"
-              >
-                <Image
-                  src={fileUrl(pathname) || '/placeholder.svg'}
-                  alt="Foto que agregaste"
-                  fill
-                  className="object-cover"
-                  sizes="200px"
-                  unoptimized
-                />
-                <button
-                  type="button"
-                  onClick={() => handleRemove(pathname)}
-                  className="absolute right-1.5 top-1.5 rounded-full bg-background/90 p-1.5 text-destructive opacity-0 shadow transition-opacity group-hover:opacity-100"
-                  aria-label="Eliminar foto"
-                >
-                  <Trash2 className="size-4" />
-                </button>
-              </div>
-            ))}
+        {/* Photos on the same sheet */}
+        <div className="mt-8 border-t border-border pt-6">
+          <div className="flex items-center justify-between">
+            <h3 className="font-serif text-lg text-foreground">
+              Tus fotos en esta hoja
+            </h3>
+            <input
+              ref={inputRef}
+              type="file"
+              accept="image/*"
+              multiple
+              className="hidden"
+              onChange={(e) => handleFiles(e.target.files)}
+            />
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={() => inputRef.current?.click()}
+              disabled={uploading}
+            >
+              {uploading ? (
+                <Loader2 className="size-4 animate-spin" />
+              ) : (
+                <ImagePlus className="size-4" />
+              )}
+              {uploading ? 'Subiendo…' : 'Agregar fotos'}
+            </Button>
           </div>
-        )}
+
+          {fotos.length === 0 ? (
+            <p className="mt-4 text-sm text-muted-foreground">
+              Aún no has agregado fotos. Son opcionales, pero hacen el recuerdo
+              más especial.
+            </p>
+          ) : (
+            <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
+              {fotos.map((pathname) => (
+                <div
+                  key={pathname}
+                  className="group relative aspect-square overflow-hidden rounded-lg border border-border"
+                >
+                  <Image
+                    src={fileUrl(pathname) || '/placeholder.svg'}
+                    alt="Foto que agregaste"
+                    fill
+                    className="object-cover"
+                    sizes="200px"
+                    unoptimized
+                  />
+                  <button
+                    type="button"
+                    onClick={() => handleRemove(pathname)}
+                    className="absolute right-1.5 top-1.5 rounded-full bg-background/90 p-1.5 text-destructive opacity-0 shadow transition-opacity group-hover:opacity-100"
+                    aria-label="Eliminar foto"
+                  >
+                    <Trash2 className="size-4" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
 
       {error && (
