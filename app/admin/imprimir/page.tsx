@@ -30,15 +30,20 @@ export default async function ImprimirPage() {
       {/* Cover — hard cover with gold frame, like the book */}
       <section className="print-page album-cover flex min-h-[70vh] flex-col items-center justify-center rounded-2xl p-12 text-center album-shadow">
         <div className="relative z-10 flex flex-col items-center">
-          <p className="text-sm uppercase tracking-[0.3em] text-accent">
+          <p className="text-sm uppercase tracking-[0.3em] text-amber-700">
             Con cariño
           </p>
-          <Feather className="mt-6 size-8 text-accent" />
-          <h1 className="mt-4 font-serif text-5xl font-bold text-primary-foreground text-balance">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/portada-jubilacion.png"
+            alt="Ilustración de un libro abierto con una pluma"
+            className="cover-image-frame mt-6 aspect-square w-64 rounded-xl object-cover"
+          />
+          <h1 className="mt-6 font-serif text-5xl font-bold text-sky-950 text-balance">
             Álbum de Jubilación
           </h1>
-          <div className="mt-6 h-px w-24 bg-accent" />
-          <p className="mt-6 max-w-md text-primary-foreground/85 text-pretty">
+          <div className="mt-6 h-px w-24 bg-amber-600/70" />
+          <p className="mt-6 max-w-md italic text-sky-900/85 text-pretty">
             Mensajes y recuerdos de quienes te acompañaron en este camino.
           </p>
         </div>
@@ -88,17 +93,27 @@ export default async function ImprimirPage() {
               ))}
             </div>
           )}
+
+          {/* Sender signature */}
+          <footer className="mt-8 border-t border-accent/40 pt-4 text-right">
+            <p className="text-xs uppercase tracking-wider text-muted-foreground">
+              De parte de
+            </p>
+            <p className="font-serif text-xl italic text-primary">
+              {entry.nombre}
+            </p>
+          </footer>
         </article>
       ))}
 
       {/* Back cover — hard cover with gold frame */}
       <section className="print-page album-cover mt-8 flex min-h-[50vh] flex-col items-center justify-center rounded-2xl p-12 text-center album-shadow">
         <div className="relative z-10 flex flex-col items-center">
-          <h2 className="font-serif text-4xl font-bold text-primary-foreground">
+          <h2 className="font-serif text-4xl font-bold text-sky-950">
             ¡Feliz jubilación!
           </h2>
-          <div className="mt-5 h-px w-20 bg-accent" />
-          <p className="mt-5 text-primary-foreground/85 text-pretty">
+          <div className="mt-5 h-px w-20 bg-amber-600/70" />
+          <p className="mt-5 italic text-sky-900/85 text-pretty">
             Gracias por tantos años de dedicación.
           </p>
         </div>

@@ -220,42 +220,61 @@
   background-color: oklch(0.985 0.012 88);
 }
 
-/* Book mount: gives the flipbook a bound, hard-cover look */
+/* Book mount: gives the flipbook a bound, hard-cover look (light blue binding) */
 .book-mount {
   padding: 10px;
   border-radius: 6px 12px 12px 6px;
   background: linear-gradient(
     90deg,
-    oklch(0.3 0.04 165) 0%,
-    oklch(0.36 0.05 160) 3%,
-    oklch(0.36 0.05 160) 97%,
-    oklch(0.3 0.04 165) 100%
+    oklch(0.5 0.1 245) 0%,
+    oklch(0.58 0.1 240) 3%,
+    oklch(0.58 0.1 240) 97%,
+    oklch(0.5 0.1 245) 100%
   );
   box-shadow:
-    0 2px 4px oklch(0.2 0.03 60 / 0.2),
-    0 18px 50px oklch(0.2 0.03 60 / 0.35);
+    0 2px 4px oklch(0.2 0.04 250 / 0.2),
+    0 18px 50px oklch(0.3 0.06 250 / 0.35);
 }
 
-/* Hard covers */
+/* Hard covers: elaborate light-blue cover with a double gold frame */
 .album-cover {
   position: relative;
-  color: var(--primary-foreground);
+  color: oklch(0.28 0.05 250);
   background:
     radial-gradient(
-      circle at 30% 20%,
-      oklch(0.48 0.07 158 / 0.6),
-      transparent 60%
+      circle at 50% 18%,
+      oklch(0.92 0.04 235 / 0.9),
+      transparent 55%
     ),
-    linear-gradient(135deg, oklch(0.4 0.06 160), oklch(0.3 0.05 165));
+    linear-gradient(160deg, oklch(0.86 0.06 235), oklch(0.72 0.09 240));
 }
 
+/* Outer gold frame */
+.album-cover::before {
+  content: '';
+  position: absolute;
+  inset: 10px;
+  border: 2px solid oklch(0.74 0.11 80 / 0.7);
+  border-radius: 6px;
+  pointer-events: none;
+}
+
+/* Inner thin gold frame */
 .album-cover::after {
   content: '';
   position: absolute;
-  inset: 12px;
-  border: 1px solid oklch(0.78 0.11 78 / 0.6);
-  border-radius: 4px;
+  inset: 18px;
+  border: 1px solid oklch(0.74 0.11 80 / 0.5);
+  border-radius: 3px;
   pointer-events: none;
+}
+
+/* Framed watercolor image on the cover */
+.cover-image-frame {
+  border: 3px solid oklch(0.74 0.11 80 / 0.85);
+  box-shadow:
+    0 2px 6px oklch(0.3 0.06 250 / 0.25),
+    inset 0 0 0 1px oklch(1 0 0 / 0.4);
 }
 
 /* Inner leaves: warm paper with a subtle gutter shadow toward the spine */

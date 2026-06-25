@@ -113,6 +113,15 @@ function EntryContent({
           </div>
         )}
       </div>
+      {/* Sender signature */}
+      <div className="mt-4 border-t border-accent/40 pt-3 text-right">
+        <p className="text-xs uppercase tracking-wider text-muted-foreground">
+          De parte de
+        </p>
+        <p className="font-serif text-lg italic text-primary">
+          {entry.nombre}
+        </p>
+      </div>
     </div>
   )
 }
@@ -191,15 +200,24 @@ export function AlbumBook({
         >
           {/* Front cover */}
           <Cover>
-            <div className="flex h-full flex-col items-center justify-center p-10 text-center">
-              <p className="text-sm uppercase tracking-widest text-accent">
+            <div className="flex h-full flex-col items-center justify-center px-8 py-9 text-center">
+              <p className="text-xs uppercase tracking-[0.25em] text-amber-700">
                 Con cariño
               </p>
-              <h2 className="mt-4 font-serif text-3xl font-bold leading-tight text-primary-foreground text-balance">
+              <h2 className="mt-3 font-serif text-2xl font-bold leading-tight text-sky-950 text-balance sm:text-3xl">
                 Álbum de Jubilación
               </h2>
-              <div className="mt-6 h-px w-16 bg-accent" />
-              <p className="mt-6 text-sm text-primary-foreground/80 text-pretty">
+              <div className="mt-3 flex items-center gap-2">
+                <span className="h-px w-8 bg-amber-600/70" />
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src="/portada-jubilacion.png"
+                  alt="Ilustración de un libro abierto con una pluma"
+                  className="cover-image-frame mx-auto my-1 aspect-square w-44 rounded-lg object-cover sm:w-52"
+                />
+                <span className="h-px w-8 bg-amber-600/70" />
+              </div>
+              <p className="mt-4 max-w-[16rem] text-sm italic leading-relaxed text-sky-900/80 text-pretty">
                 Mensajes y recuerdos de quienes te acompañaron en este camino.
               </p>
             </div>
@@ -221,10 +239,11 @@ export function AlbumBook({
           {/* Back cover */}
           <Cover>
             <div className="flex h-full flex-col items-center justify-center p-10 text-center">
-              <h2 className="font-serif text-2xl font-bold text-primary-foreground">
+              <h2 className="font-serif text-2xl font-bold text-sky-950">
                 ¡Feliz jubilación!
               </h2>
-              <p className="mt-4 text-sm text-primary-foreground/80 text-pretty">
+              <div className="mt-3 h-px w-12 bg-amber-600/70" />
+              <p className="mt-4 text-sm italic text-sky-900/80 text-pretty">
                 Gracias por tantos años de dedicación.
               </p>
             </div>
