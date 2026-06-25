@@ -1,6 +1,7 @@
 'use client'
 
 import type { Entry } from '@/lib/db/schema'
+import { COLOR_DEFAULT, fontFamily } from '@/lib/estilos'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import dynamic from 'next/dynamic'
 import { forwardRef, useEffect, useRef, useState } from 'react'
@@ -44,7 +45,13 @@ function EntryPage({ entry, index }: { entry: Entry; index: number }) {
         </h3>
       </div>
       <div className="flex-1 overflow-y-auto">
-        <p className="whitespace-pre-wrap font-serif text-base leading-relaxed text-foreground">
+        <p
+          className="whitespace-pre-wrap text-base leading-relaxed"
+          style={{
+            color: entry.color || COLOR_DEFAULT,
+            fontFamily: fontFamily(entry.font),
+          }}
+        >
           {entry.mensaje || 'Sin mensaje escrito.'}
         </p>
         {entry.fotos && entry.fotos.length > 0 && (

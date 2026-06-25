@@ -1,5 +1,6 @@
 import { getAllEntries } from '@/app/actions'
 import { PrintButton } from '@/components/print-button'
+import { COLOR_DEFAULT, fontFamily } from '@/lib/estilos'
 import { isAdmin } from '@/lib/session'
 import { redirect } from 'next/navigation'
 
@@ -53,7 +54,13 @@ export default async function ImprimirPage() {
               {entry.nombre}
             </h2>
           </header>
-          <p className="whitespace-pre-wrap font-serif text-base leading-relaxed text-foreground">
+          <p
+            className="whitespace-pre-wrap text-base leading-relaxed"
+            style={{
+              color: entry.color || COLOR_DEFAULT,
+              fontFamily: fontFamily(entry.font),
+            }}
+          >
             {entry.mensaje || 'Sin mensaje escrito.'}
           </p>
           {entry.fotos && entry.fotos.length > 0 && (

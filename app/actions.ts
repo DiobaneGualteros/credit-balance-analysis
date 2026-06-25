@@ -66,6 +66,8 @@ export async function saveMessage(formData: FormData) {
   if (!id) return { error: 'Tu sesión expiró. Vuelve a ingresar.' }
 
   const mensaje = String(formData.get('mensaje') ?? '').trim()
+  const color = String(formData.get('color') ?? '#1f2937').trim()
+  const font = String(formData.get('font') ?? 'serif').trim()
   const fotosRaw = String(formData.get('fotos') ?? '[]')
   let fotos: string[] = []
   try {
@@ -77,7 +79,7 @@ export async function saveMessage(formData: FormData) {
 
   await db
     .update(entries)
-    .set({ mensaje, fotos, updatedAt: new Date() })
+    .set({ mensaje, fotos, color, font, updatedAt: new Date() })
     .where(eq(entries.id, id))
 
   revalidatePath('/escribir')

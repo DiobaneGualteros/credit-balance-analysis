@@ -5,6 +5,13 @@ import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import type { Entry } from '@/lib/db/schema'
+import {
+  COLOR_DEFAULT,
+  COLOR_OPTIONS,
+  FONT_DEFAULT,
+  FONT_OPTIONS,
+  fontFamily,
+} from '@/lib/estilos'
 import { FRASES_JUBILACION, fraseAleatoria } from '@/lib/frases'
 import { ImagePlus, Loader2, Quote, RefreshCw, Sparkles, Trash2 } from 'lucide-react'
 import Image from 'next/image'
@@ -16,6 +23,8 @@ function fileUrl(pathname: string) {
 
 export function MessageEditor({ entry }: { entry: Entry }) {
   const [mensaje, setMensaje] = useState(entry.mensaje ?? '')
+  const [color, setColor] = useState(entry.color ?? COLOR_DEFAULT)
+  const [font, setFont] = useState(entry.font ?? FONT_DEFAULT)
   const [fotos, setFotos] = useState<string[]>(entry.fotos ?? [])
   const [uploading, setUploading] = useState(false)
   const [status, setStatus] = useState<string | null>(null)
@@ -74,6 +83,8 @@ export function MessageEditor({ entry }: { entry: Entry }) {
       const fd = new FormData()
       fd.append('mensaje', mensaje)
       fd.append('fotos', JSON.stringify(fotos))
+      fd.append('color', color)
+      fd.append('font', font)
       const result = await saveMessage(fd)
       if (result?.error) setError(result.error)
       else setStatus('Tu mensaje se guardó correctamente.')
@@ -116,12 +127,60 @@ export function MessageEditor({ entry }: { entry: Entry }) {
         >
           Escribe tu mensaje aquí
         </Label>
+
+        {/* Style controls: text color and font */}
+        <div className="mb-3 flex flex-wrap items-center gap-x-6 gap-y-3">
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-medium text-foreground">Color:</span>
+            <div className="flex items-center gap-1.5">
+              {COLOR_OPTIONS.map((c) => (
+                <button
+                  key={c.value}
+                  type="button"
+                  onClick={() => setColor(c.value)}
+                  aria-label={`Color ${c.label}`}
+                  aria-pressed={color === c.value}
+                  className={`size-7 rounded-full border-2 transition-transform hover:scale-110 ${
+                    color === c.value
+                      ? 'border-foreground ring-2 ring-ring/40'
+                      : 'border-border'
+                  }`}
+                  style={{ backgroundColor: c.value }}
+                />
+              ))}
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-medium text-foreground">Fuente:</span>
+            <div className="flex flex-wrap items-center gap-1.5">
+              {FONT_OPTIONS.map((f) => (
+                <button
+                  key={f.key}
+                  type="button"
+                  onClick={() => setFont(f.key)}
+                  aria-pressed={font === f.key}
+                  style={{ fontFamily: f.family }}
+                  className={`rounded-md border px-2.5 py-1 text-sm transition-colors ${
+                    font === f.key
+                      ? 'border-primary bg-primary text-primary-foreground'
+                      : 'border-border bg-card text-foreground hover:bg-secondary'
+                  }`}
+                >
+                  {f.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+
         <Textarea
           id="mensaje"
           value={mensaje}
           onChange={(e) => setMensaje(e.target.value)}
           placeholder="Querido(a)... Quiero agradecerte por todos estos años..."
-          className="min-h-64 resize-y rounded-lg border border-border bg-card/80 p-4 font-serif text-lg leading-relaxed text-foreground shadow-inner focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/40"
+          style={{ color, fontFamily: fontFamily(font) }}
+          className="min-h-64 resize-y rounded-lg border border-border bg-card/80 p-4 text-lg leading-relaxed shadow-inner placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/40"
         />
 
         {/* Photos on the same sheet */}

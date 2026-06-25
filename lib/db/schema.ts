@@ -7,6 +7,9 @@ export const entries = pgTable('entries', {
   mensaje: text('mensaje').notNull().default(''),
   // Array of blob pathnames (private store)
   fotos: jsonb('fotos').notNull().default([]).$type<string[]>(),
+  // Text color (hex) and font key chosen by the participant
+  color: text('color').notNull().default('#1f2937'),
+  font: text('font').notNull().default('serif'),
   createdAt: timestamp('created_at', { withTimezone: true })
     .notNull()
     .defaultNow(),
