@@ -3,6 +3,7 @@
 import { deleteEntry } from '@/app/actions'
 import type { Entry } from '@/lib/db/schema'
 import { COLOR_DEFAULT, fontFamily } from '@/lib/estilos'
+import { BOOK_TITLE, INTRO_PARRAFOS, INTRO_SUBTITULO } from '@/lib/libro'
 import { ChevronLeft, ChevronRight, Loader2, Trash2 } from 'lucide-react'
 import dynamic from 'next/dynamic'
 import { useRouter } from 'next/navigation'
@@ -50,15 +51,114 @@ const Cover = forwardRef<HTMLDivElement, PageProps>(function Cover(
   )
 })
 
+// Header reused on every inner leaf: shows the book title, not "Página N"
+function LeafHeader() {
+  return (
+    <div className="mb-4 flex items-center justify-center gap-3 border-b border-accent/40 pb-3">
+      <span className="h-px w-8 bg-accent/60" />
+      <p className="font-serif text-sm uppercase tracking-[0.2em] text-primary">
+        {BOOK_TITLE}
+      </p>
+      <span className="h-px w-8 bg-accent/60" />
+    </div>
+  )
+}
+
+// Footer reused on every inner leaf: shows the page number
+function LeafFooter({ pageNumber }: { pageNumber: number }) {
+  return (
+    <div className="mt-3 border-t border-accent/30 pt-2 text-center">
+      <p className="text-xs text-muted-foreground">{pageNumber}</p>
+    </div>
+  )
+}
+
+const BlankPageContent = forwardRef<HTMLDivElement, { label?: string }>(
+  function BlankPageContent({ label }, ref) {
+    return (
+      <div
+        ref={ref}
+        className="album-leaf flex h-full w-full items-center justify-center"
+      >
+        <p className="text-xs italic text-muted-foreground/60">
+          {label ?? ''}
+        </p>
+      </div>
+    )
+  },
+)
+
+function IntroContent() {
+  return (
+    <div className="flex h-full flex-col p-7 sm:p-8">
+      <LeafHeader />
+      <div className="flex-1 overflow-y-auto">
+        <h3 className="font-serif text-xl font-bold text-foreground text-balance">
+          Introducción
+        </h3>
+        <p className="mt-1 font-serif text-base italic text-primary">
+          {INTRO_SUBTITULO}
+        </p>
+        <div className="mt-4 space-y-3">
+          {INTRO_PARRAFOS.map((p, i) => (
+            <p
+              key={i}
+              className="text-justify text-sm leading-relaxed text-foreground"
+            >
+              {p}
+            </p>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function GlossaryContent({
+  entries,
+  startPage,
+}: {
+  entries: Entry[]
+  startPage: number
+}) {
+  return (
+    <div className="flex h-full flex-col p-7 sm:p-8">
+      <LeafHeader />
+      <div className="flex-1 overflow-y-auto">
+        <h3 className="font-serif text-xl font-bold text-foreground">
+          Glosario
+        </h3>
+        <p className="mt-1 text-sm italic text-muted-foreground">
+          Quienes dejaron su huella en estas páginas
+        </p>
+        <ul className="mt-4 space-y-2">
+          {entries.map((entry, i) => (
+            <li
+              key={entry.id}
+              className="flex items-baseline gap-2 text-sm text-foreground"
+            >
+              <span className="font-medium">{entry.nombre}</span>
+              <span className="flex-1 translate-y-[-3px] border-b border-dotted border-muted-foreground/40" />
+              <span className="tabular-nums text-muted-foreground">
+                {startPage + i}
+              </span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  )
+}
+
 function EntryContent({
   entry,
-  index,
+  pageNumber,
   canDelete,
   onDelete,
   deleting,
 }: {
   entry: Entry
-  index: number
+  pageNumber: number
   canDelete?: boolean
   onDelete?: (id: number) => void
   deleting?: boolean
@@ -81,15 +181,11 @@ function EntryContent({
           Borrar
         </button>
       )}
-      <div className="mb-4 border-b border-accent/40 pb-3">
-        <p className="text-xs uppercase tracking-wider text-primary">
-          Mensaje {index + 1}
-        </p>
-        <h3 className="font-serif text-xl font-semibold text-foreground">
+      <LeafHeader />
+      <div className="flex-1 overflow-y-auto">
+        <h3 className="mb-3 font-serif text-lg font-semibold text-foreground">
           {entry.nombre}
         </h3>
-      </div>
-      <div className="flex-1 overflow-y-auto">
         <p
           className="whitespace-pre-wrap text-base leading-relaxed"
           style={{
@@ -118,10 +214,11 @@ function EntryContent({
         <p className="text-xs uppercase tracking-wider text-muted-foreground">
           De parte de
         </p>
-        <p className="font-serif text-lg italic text-primary">
+        <p className="font-serif text-lg italic text-foreground">
           {entry.nombre}
         </p>
       </div>
+      <LeafFooter pageNumber={pageNumber} />
     </div>
   )
 }
@@ -205,7 +302,7 @@ export function AlbumBook({
                 Con cariño
               </p>
               <h2 className="mt-3 font-serif text-2xl font-bold leading-tight text-sky-950 text-balance sm:text-3xl">
-                Álbum de Jubilación
+                Álbum de Recuerdos
               </h2>
               <p className="mt-2 text-xs uppercase tracking-[0.2em] text-amber-700">
                 Para
@@ -229,12 +326,28 @@ export function AlbumBook({
             </div>
           </Cover>
 
+          {/* Blank page between cover and introduction */}
+          <BlankPageContent />
+
+          {/* Introduction */}
+          <Page>
+            <IntroContent />
+          </Page>
+
+          {/* Glossary of participants and their page numbers */}
+          <Page>
+            <GlossaryContent entries={entries} startPage={1} />
+          </Page>
+
+          {/* Blank page between introduction/glossary and the entries */}
+          <BlankPageContent />
+
           {/* Entries */}
           {entries.map((entry, i) => (
             <Page key={entry.id}>
               <EntryContent
                 entry={entry}
-                index={i}
+                pageNumber={i + 1}
                 canDelete={canDelete}
                 onDelete={handleDelete}
                 deleting={isPending && deletingId === entry.id}
