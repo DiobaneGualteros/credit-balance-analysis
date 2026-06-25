@@ -207,6 +207,12 @@ export function AlbumBook({
               <h2 className="mt-3 font-serif text-2xl font-bold leading-tight text-sky-950 text-balance sm:text-3xl">
                 Álbum de Jubilación
               </h2>
+              <p className="mt-2 text-xs uppercase tracking-[0.2em] text-amber-700">
+                Para
+              </p>
+              <p className="font-serif text-xl font-semibold text-sky-900">
+                Boris Ceballos
+              </p>
               <div className="mt-3 flex items-center gap-2">
                 <span className="h-px w-8 bg-amber-600/70" />
                 {/* eslint-disable-next-line @next/next/no-img-element */}

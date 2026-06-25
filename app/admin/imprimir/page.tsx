@@ -42,6 +42,12 @@ export default async function ImprimirPage() {
           <h1 className="mt-6 font-serif text-5xl font-bold text-sky-950 text-balance">
             Álbum de Jubilación
           </h1>
+          <p className="mt-4 text-sm uppercase tracking-[0.3em] text-amber-700">
+            Para
+          </p>
+          <p className="font-serif text-3xl font-semibold text-sky-900">
+            Boris Ceballos
+          </p>
           <div className="mt-6 h-px w-24 bg-amber-600/70" />
           <p className="mt-6 max-w-md italic text-sky-900/85 text-pretty">
             Mensajes y recuerdos de quienes te acompañaron en este camino.
