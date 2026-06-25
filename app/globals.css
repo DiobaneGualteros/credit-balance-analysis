@@ -183,6 +183,38 @@
     0 12px 40px oklch(0.2 0.03 60 / 0.25);
 }
 
+/* Decorative framed sheet for the writing page */
+.album-sheet {
+  position: relative;
+  background-color: oklch(0.99 0.008 90);
+  background-image:
+    radial-gradient(oklch(0.9 0.02 80 / 0.25) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+/* Thin gold inner frame */
+.album-sheet::before {
+  content: '';
+  position: absolute;
+  inset: 14px;
+  border: 1px solid oklch(0.72 0.1 78 / 0.55);
+  border-radius: calc(var(--radius) * 1.2);
+  pointer-events: none;
+}
+
+/* Pure white writing surface with faint ruled lines, like a real album page */
+.writing-surface {
+  background-color: #ffffff;
+  background-image: repeating-linear-gradient(
+    to bottom,
+    transparent,
+    transparent 35px,
+    oklch(0.9 0.015 230 / 0.45) 35px,
+    oklch(0.9 0.015 230 / 0.45) 36px
+  );
+  background-attachment: local;
+}
+
 /* react-pageflip needs the pages to have a hard surface */
 .page-flip-book .stf__item {
   background-color: oklch(0.985 0.012 88);

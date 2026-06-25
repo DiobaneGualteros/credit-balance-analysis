@@ -13,7 +13,15 @@ import {
   fontFamily,
 } from '@/lib/estilos'
 import { FRASES_JUBILACION, fraseAleatoria } from '@/lib/frases'
-import { ImagePlus, Loader2, Quote, RefreshCw, Sparkles, Trash2 } from 'lucide-react'
+import {
+  Feather,
+  ImagePlus,
+  Loader2,
+  Quote,
+  RefreshCw,
+  Sparkles,
+  Trash2,
+} from 'lucide-react'
 import Image from 'next/image'
 import { useEffect, useRef, useState, useTransition } from 'react'
 
@@ -94,7 +102,22 @@ export function MessageEditor({ entry }: { entry: Entry }) {
   return (
     <div className="flex flex-col gap-6">
       {/* The blank sheet: message + photos together on the same page */}
-      <div className="paper-page rounded-2xl border border-border p-6 album-shadow sm:p-10">
+      <div className="album-sheet rounded-2xl border border-border p-7 album-shadow sm:p-12">
+        {/* Decorative header */}
+        <div className="mb-8 flex flex-col items-center text-center">
+          <div className="flex w-full items-center justify-center gap-3">
+            <span className="h-px w-12 bg-accent/70 sm:w-20" />
+            <Feather className="size-5 text-accent-foreground" />
+            <span className="h-px w-12 bg-accent/70 sm:w-20" />
+          </div>
+          <h2 className="mt-3 font-serif text-2xl font-semibold text-foreground">
+            Mi hoja del álbum
+          </h2>
+          <p className="mt-1 text-sm italic text-muted-foreground">
+            Un recuerdo para celebrar tu jubilación
+          </p>
+        </div>
+
         {/* Suggested phrase to help the writer */}
         <div className="mb-6 rounded-xl border-2 border-accent bg-accent/30 p-4">
           <div className="flex items-center gap-2 text-sm font-semibold text-accent-foreground">
@@ -180,7 +203,7 @@ export function MessageEditor({ entry }: { entry: Entry }) {
           onChange={(e) => setMensaje(e.target.value)}
           placeholder="Querido(a)... Quiero agradecerte por todos estos años..."
           style={{ color, fontFamily: fontFamily(font) }}
-          className="min-h-64 resize-y rounded-lg border border-border bg-card/80 p-4 text-lg leading-relaxed shadow-inner placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/40"
+          className="writing-surface min-h-72 resize-y rounded-lg border border-border p-4 text-lg leading-relaxed shadow-sm placeholder:text-muted-foreground/70 focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/40"
         />
 
         {/* Photos on the same sheet */}
