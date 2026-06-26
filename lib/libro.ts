@@ -7,3 +7,4 @@ export const INTRO_PARRAFOS = [
   'Este libro es un homenaje a ese primer lunes y a todos los que le siguieron. Aquí no encontrarás solo páginas, sino risas compartidas, desafíos superados y momentos que quedaron grabados en la memoria colectiva. Cada foto, cada anécdota, cada palabra escrita por quienes fuimos parte de su camino, es un testimonio de que su legado no se jubila.',
   'Boris, hoy te decimos: gracias por convertirte en parte de nuestra historia. Que estas páginas sean un recordatorio de que, aunque el reloj marque un nuevo inicio para ti, tu huella en Grupo Éxito seguirá viva en cada uno de nosotros.',
 ]
+
