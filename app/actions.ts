@@ -115,6 +115,10 @@ export async function leaveParticipant() {
   redirect('/')
 }
 
+export async function getAllEntryNames(): Promise<{ id: number; nombre: string }[]> {
+  return db.select({ id: entries.id, nombre: entries.nombre }).from(entries).orderBy(desc(entries.createdAt))
+}
+
 // --- Admin ---
 
 export async function adminLogin(formData: FormData) {
