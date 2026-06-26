@@ -90,10 +90,9 @@ function Spine() {
 
 // ─── Paper background style ──────────────────────────────────────────────────
 const paperStyle: React.CSSProperties = {
-  backgroundColor: '#fdf8ef',
-  backgroundImage:
-    'radial-gradient(ellipse at 20% 20%, rgba(245,230,195,0.35) 0%, transparent 60%),' +
-    'radial-gradient(ellipse at 80% 80%, rgba(230,215,180,0.25) 0%, transparent 60%)',
+  backgroundImage: 'url("/paper-texture.png")',
+  backgroundSize: 'cover',
+  backgroundPosition: 'center',
 }
 
 // ─── Shared scrollbar style ──────────────────────────────────────────────────
