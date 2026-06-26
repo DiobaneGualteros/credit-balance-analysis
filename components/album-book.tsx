@@ -1,396 +1,66 @@
-'use client'
+import { EntryForm } from '@/components/entry-form'
+import { Card, CardContent } from '@/components/ui/card'
+import { getParticipantId } from '@/lib/session'
+import Image from 'next/image'
+import Link from 'next/link'
+import { redirect } from 'next/navigation'
 
-import { deleteEntry } from '@/app/actions'
-import type { Entry } from '@/lib/db/schema'
-import { COLOR_DEFAULT, fontFamily } from '@/lib/estilos'
-import { BOOK_TITLE, INTRO_PARRAFOS, INTRO_SUBTITULO } from '@/lib/libro'
-import { ChevronLeft, ChevronRight, Loader2, Trash2 } from 'lucide-react'
-import dynamic from 'next/dynamic'
-import { useRouter } from 'next/navigation'
-import { forwardRef, useEffect, useRef, useState, useTransition } from 'react'
+export default async function HomePage() {
+  const participantId = await getParticipantId()
+  if (participantId) redirect('/escribir')
 
-const HTMLFlipBook = dynamic(() => import('react-pageflip'), { ssr: false })
-
-function fileUrl(pathname: string) {
-  return `/api/file?pathname=${encodeURIComponent(pathname)}`
-}
-
-type PageProps = {
-  children: React.ReactNode
-  className?: string
-}
-
-// ─── Decorative ornamental frame ────────────────────────────────────────────
-function DecorativeFrame() {
   return (
-    <svg
-      className="pointer-events-none absolute inset-0 h-full w-full"
-      viewBox="0 0 300 400"
-      preserveAspectRatio="none"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      {/* Double border */}
-      <rect x="8"  y="8"  width="284" height="384" stroke="#9B7320" strokeWidth="0.9" />
-      <rect x="13" y="13" width="274" height="374" stroke="#9B7320" strokeWidth="0.3" />
+    <main className="flex min-h-dvh flex-col items-center justify-center px-4 py-10">
+      <div className="grid w-full max-w-5xl items-center gap-8 lg:grid-cols-2">
+        {/* Visual side */}
+        <div className="order-1 flex flex-col items-center text-center lg:items-start lg:text-left">
+          <span className="rounded-full border border-border bg-card px-4 py-1 text-xs font-medium uppercase tracking-wider text-primary">
+            Álbum de despedida
+          </span>
+          <h1 className="mt-5 font-serif text-4xl font-bold leading-tight text-balance text-foreground sm:text-5xl">
+            Una felicitación para celebrar su jubilación
+          </h1>
+          <p className="mt-4 max-w-md text-pretty leading-relaxed text-muted-foreground">
+            Deja un mensaje desde el corazón y comparte tus fotos favoritas.
+            Todos los aportes se unirán en un hermoso álbum virtual que le
+            entregaremos como regalo de despedida.
+          </p>
+          <div className="mt-6 overflow-hidden rounded-2xl border border-border album-shadow">
+            <Image
+              src="/portada-jubilacion.png"
+              alt="Ilustración decorativa de un álbum de jubilación"
+              width={520}
+              height={340}
+              className="h-auto w-full max-w-md object-cover"
+              priority
+            />
+          </div>
+        </div>
 
-      {/* ── TOP ORNAMENT (centered at x=150, y=8) ── */}
-      {/* Central bud */}
-      <path d="M150,4 C148,1 145,0 150,0 C155,0 152,1 150,4Z" fill="#9B7320"/>
-      {/* Small loops flanking bud */}
-      <path d="M146,8 C144,5.5 144,3.5 147,5 C149,6 150,8 150,8 C150,8 151,6 153,5 C156,3.5 156,5.5 154,8"
-            stroke="#9B7320" strokeWidth="0.7" />
-      {/* Left tendril */}
-      <path d="M144,8.5 C128,4.5 112,12 97,8.5 C82,5 72,12.5 57,9.5 C48,7.5 42,12 36,9"
-            stroke="#9B7320" strokeWidth="1" strokeLinecap="round"/>
-      {/* Left end curl */}
-      <path d="M36,9 C30,5.5 27,12 33,14 C37,15.5 40,11 36,9" stroke="#9B7320" strokeWidth="0.8"/>
-      {/* Left accent circle */}
-      <circle cx="97" cy="8.5" r="2.2" fill="#9B7320"/>
-      {/* Right tendril */}
-      <path d="M156,8.5 C172,4.5 188,12 203,8.5 C218,5 228,12.5 243,9.5 C252,7.5 258,12 264,9"
-            stroke="#9B7320" strokeWidth="1" strokeLinecap="round"/>
-      {/* Right end curl */}
-      <path d="M264,9 C270,5.5 273,12 267,14 C263,15.5 260,11 264,9" stroke="#9B7320" strokeWidth="0.8"/>
-      {/* Right accent circle */}
-      <circle cx="203" cy="8.5" r="2.2" fill="#9B7320"/>
-
-      {/* ── BOTTOM ORNAMENT (mirrored) ── */}
-      <path d="M150,396 C148,399 145,400 150,400 C155,400 152,399 150,396Z" fill="#9B7320"/>
-      <path d="M146,392 C144,394.5 144,396.5 147,395 C149,394 150,392 150,392 C150,392 151,394 153,395 C156,396.5 156,394.5 154,392"
-            stroke="#9B7320" strokeWidth="0.7"/>
-      {/* Left tendril bottom */}
-      <path d="M144,391.5 C128,395.5 112,388 97,391.5 C82,395 72,387.5 57,390.5 C48,392.5 42,388 36,391"
-            stroke="#9B7320" strokeWidth="1" strokeLinecap="round"/>
-      <path d="M36,391 C30,394.5 27,388 33,386 C37,384.5 40,389 36,391" stroke="#9B7320" strokeWidth="0.8"/>
-      <circle cx="97" cy="391.5" r="2.2" fill="#9B7320"/>
-      {/* Right tendril bottom */}
-      <path d="M156,391.5 C172,395.5 188,388 203,391.5 C218,395 228,387.5 243,390.5 C252,392.5 258,388 264,391"
-            stroke="#9B7320" strokeWidth="1" strokeLinecap="round"/>
-      <path d="M264,391 C270,394.5 273,388 267,386 C263,384.5 260,389 264,391" stroke="#9B7320" strokeWidth="0.8"/>
-      <circle cx="203" cy="391.5" r="2.2" fill="#9B7320"/>
-    </svg>
-  )
-}
-
-// ─── Page spine shadow (visible in landscape/two-page mode) ─────────────────
-function Spine() {
-  return (
-    <div
-      className="pointer-events-none absolute inset-y-0 left-1/2 z-30 -translate-x-1/2"
-      style={{
-        width: '6px',
-        background:
-          'linear-gradient(to right, rgba(0,0,0,0.18) 0%, rgba(0,0,0,0.06) 40%, rgba(255,255,255,0.1) 50%, rgba(0,0,0,0.06) 60%, rgba(0,0,0,0.18) 100%)',
-        boxShadow: '-4px 0 12px rgba(0,0,0,0.15), 4px 0 12px rgba(0,0,0,0.15)',
-      }}
-    />
-  )
-}
-
-// ─── Paper background style ──────────────────────────────────────────────────
-const paperStyle: React.CSSProperties = {}
-
-// ─── Shared scrollbar style ──────────────────────────────────────────────────
-const scrollbarStyle: React.CSSProperties = {
-  scrollbarWidth: 'thin',
-  scrollbarColor: '#c8a84b transparent',
-}
-
-// ─── Page wrapper ────────────────────────────────────────────────────────────
-const Page = forwardRef<HTMLDivElement, PageProps>(function Page(
-  { children, className = '' },
-  ref,
-) {
-  return (
-    <div
-      ref={ref}
-      className={`album-leaf relative flex h-full w-full flex-col overflow-hidden ${className}`}
-      style={paperStyle}
-    >
-      <DecorativeFrame />
-      {children}
-    </div>
-  )
-})
-
-const Cover = forwardRef<HTMLDivElement, PageProps>(function Cover(
-  { children, className = '' },
-  ref,
-) {
-  return (
-    <div
-      ref={ref}
-      data-density="hard"
-      className={`album-cover flex h-full w-full flex-col overflow-hidden ${className}`}
-    >
-      {children}
-    </div>
-  )
-})
-
-// ─── Shared inner-page header ────────────────────────────────────────────────
-function LeafHeader() {
-  return (
-    <div className="mb-4 flex items-center justify-center gap-3 border-b border-amber-600/40 pb-3">
-      <span className="h-px w-8 bg-amber-600/60" />
-      <p className="font-serif text-sm uppercase tracking-[0.2em] text-amber-700">
-        {BOOK_TITLE}
-      </p>
-      <span className="h-px w-8 bg-amber-600/60" />
-    </div>
-  )
-}
-
-function LeafFooter({ pageNumber }: { pageNumber: number }) {
-  return (
-    <div className="mt-3 border-t border-amber-600/30 pt-2 text-center">
-      <p className="text-xs text-neutral-500">{pageNumber}</p>
-    </div>
-  )
-}
-
-// ─── Blank separator page ────────────────────────────────────────────────────
-const BlankPageContent = forwardRef<HTMLDivElement, { label?: string }>(
-  function BlankPageContent({ label }, ref) {
-    return (
-      <div
-        ref={ref}
-        className="album-leaf relative flex h-full w-full items-center justify-center"
-        style={paperStyle}
-      >
-        <DecorativeFrame />
-        <p className="relative z-10 text-xs italic text-neutral-400">
-          {label ?? ''}
-        </p>
-      </div>
-    )
-  },
-)
-
-// ─── Introduction page ───────────────────────────────────────────────────────
-function IntroContent() {
-  return (
-    <div className="relative z-10 flex h-full flex-col p-8 sm:p-9">
-      <LeafHeader />
-      <div
-        className="flex-1 overflow-y-auto pr-4"
-        style={scrollbarStyle}
-      >
-        <h3 className="font-serif text-xl font-bold text-neutral-900 text-balance">
-          Introducción
-        </h3>
-        <p className="mt-1 font-serif text-base italic text-amber-700">
-          {INTRO_SUBTITULO}
-        </p>
-        <div className="mt-4 space-y-3">
-          {INTRO_PARRAFOS.map((p, i) => (
-            <p
-              key={i}
-              className="text-justify text-sm leading-relaxed text-neutral-900"
+        {/* Form side */}
+        <div className="order-2">
+          <Card className="album-shadow border-border">
+            <CardContent className="p-6 sm:p-8">
+              <h2 className="font-serif text-2xl font-semibold text-foreground">
+                Ingresa para participar
+              </h2>
+              <p className="mt-1 mb-6 text-sm text-muted-foreground">
+                Identifícate con tu cédula para abrir tu hoja en blanco.
+              </p>
+              <EntryForm />
+            </CardContent>
+          </Card>
+          <p className="mt-6 text-center text-xs text-muted-foreground">
+            ¿Eres el organizador?{' '}
+            <Link
+              href="/admin"
+              className="font-medium text-primary underline-offset-4 hover:underline"
             >
-              {p}
-            </p>
-          ))}
+              Entrar al panel de administrador
+            </Link>
+          </p>
         </div>
       </div>
-    </div>
+    </main>
   )
 }
-
-// ─── Glossary page ───────────────────────────────────────────────────────────
-function GlossaryContent({
-  entries,
-  startPage,
-}: {
-  entries: Entry[]
-  startPage: number
-}) {
-  return (
-    <div className="relative z-10 flex h-full flex-col p-8 sm:p-9">
-      <LeafHeader />
-      <div
-        className="flex-1 overflow-y-auto pr-4"
-        style={scrollbarStyle}
-      >
-        <h3 className="font-serif text-xl font-bold text-neutral-900">
-          Glosario
-        </h3>
-        <p className="mt-1 text-sm italic text-neutral-500">
-          Quienes dejaron su huella en estas páginas
-        </p>
-        <ul className="mt-4 space-y-2">
-          {entries.map((entry, i) => (
-            <li
-              key={entry.id}
-              className="flex items-baseline gap-2 text-sm text-neutral-900"
-            >
-              <span className="font-medium">{entry.nombre}</span>
-              <span className="flex-1 translate-y-[-3px] border-b border-dotted border-neutral-400" />
-              <span className="tabular-nums text-neutral-500">
-                {startPage + i}
-              </span>
-            </li>
-          ))}
-        </ul>
-      </div>
-    </div>
-  )
-}
-
-// ─── Entry page ──────────────────────────────────────────────────────────────
-function EntryContent({
-  entry,
-  pageNumber,
-  canDelete,
-  onDelete,
-  deleting,
-}: {
-  entry: Entry
-  pageNumber: number
-  canDelete?: boolean
-  onDelete?: (id: number) => void
-  deleting?: boolean
-}) {
-  return (
-    <div className="relative z-10 flex h-full flex-col p-8 sm:p-9">
-      {canDelete && (
-        <button
-          type="button"
-          onClick={() => onDelete?.(entry.id)}
-          disabled={deleting}
-          className="absolute right-4 top-4 z-20 flex items-center gap-1 rounded-full border border-red-300 bg-white/90 px-2.5 py-1 text-xs font-medium text-red-600 shadow-sm transition-colors hover:bg-red-600 hover:text-white disabled:opacity-50"
-          aria-label={`Eliminar la página de ${entry.nombre}`}
-        >
-          {deleting ? (
-            <Loader2 className="size-3.5 animate-spin" />
-          ) : (
-            <Trash2 className="size-3.5" />
-          )}
-          Borrar
-        </button>
-      )}
-      <LeafHeader />
-      <div
-        className="flex-1 overflow-y-auto pr-4"
-        style={scrollbarStyle}
-      >
-        <h3 className="mb-3 font-serif text-lg font-semibold text-neutral-900">
-          {entry.nombre}
-        </h3>
-        <p
-          className="whitespace-pre-wrap text-base leading-relaxed"
-          style={{
-            color: entry.color || COLOR_DEFAULT,
-            fontFamily: fontFamily(entry.font),
-          }}
-        >
-          {entry.mensaje || 'Sin mensaje escrito.'}
-        </p>
-        {entry.fotos && entry.fotos.length > 0 && (
-          <div className="mt-5 grid grid-cols-2 gap-2">
-            {entry.fotos.slice(0, 4).map((p) => (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                key={p}
-                src={fileUrl(p) || '/placeholder.svg'}
-                alt={`Foto de ${entry.nombre}`}
-                className="aspect-square w-full rounded-md border border-amber-200/60 object-cover"
-              />
-            ))}
-          </div>
-        )}
-      </div>
-      <LeafFooter pageNumber={pageNumber} />
-    </div>
-  )
-}
-
-// ─── Main AlbumBook component ─────────────────────────────────────────────────
-export function AlbumBook({
-  entries,
-  canDelete = false,
-}: {
-  entries: Entry[]
-  canDelete?: boolean
-}) {
-  const router = useRouter()
-  const bookRef = useRef<{
-    pageFlip: () => { flipNext: () => void; flipPrev: () => void }
-  } | null>(null)
-  const [size, setSize] = useState({ width: 400, height: 540 })
-  const [portrait, setPortrait] = useState(false)
-  const [isPending, startTransition] = useTransition()
-  const [deletingId, setDeletingId] = useState<number | null>(null)
-
-  useEffect(() => {
-    function update() {
-      const isMobile = window.innerWidth < 768
-      const available = window.innerWidth - 56
-      const width = isMobile
-        ? Math.min(440, Math.max(280, available))
-        : Math.min(440, Math.max(300, Math.floor(available / 2)))
-      setPortrait(isMobile)
-      setSize({ width, height: Math.round(width * 1.35) })
-    }
-    update()
-    window.addEventListener('resize', update)
-    return () => window.removeEventListener('resize', update)
-  }, [])
-
-  function flipNext() {
-    bookRef.current?.pageFlip()?.flipNext()
-  }
-  function flipPrev() {
-    bookRef.current?.pageFlip()?.flipPrev()
-  }
-
-  function handleDelete(id: number) {
-    if (!window.confirm('¿Seguro que deseas eliminar esta página del álbum?')) return
-    setDeletingId(id)
-    startTransition(async () => {
-      await deleteEntry(id)
-      setDeletingId(null)
-      router.refresh()
-    })
-  }
-
-  return (
-    <div className="flex flex-col items-center gap-6">
-      {/* Book mount — relative so the spine overlay can be positioned inside */}
-      <div className="book-mount relative">
-        {/* Center spine divider (desktop two-page mode only) */}
-        {!portrait && <Spine />}
-
-        {/* @ts-expect-error react-pageflip types are loose */}
-        <HTMLFlipBook
-          key={portrait ? 'portrait' : 'landscape'}
-          ref={bookRef}
-          width={size.width}
-          height={size.height}
-          size="fixed"
-          minWidth={280}
-          maxWidth={440}
-          minHeight={400}
-          maxHeight={620}
-          showCover
-          usePortrait={portrait}
-          drawShadow
-          maxShadowOpacity={0.5}
-          mobileScrollSupport
-          className="page-flip-book"
-        >
-          {/* Front cover */}
-          <Cover>
-            <div className="flex h-full flex-col items-center justify-center px-8 py-9 text-center">
-              <p className="text-xs uppercase tracking-[0.25em] text-amber-700">
-                Con cariño
-              </p>
-              <h2 className="mt-3 font-serif text-2xl font-bold leading-tight text-sky-950 text-balance sm:text-3xl">
-                Álbum de Recuerdos
-              </h2>
-              <p className="mt-2 text-xs uppercase tracking-[0.2em] text-amber-700">
-                Para
-              </p>
-              <p className="font-serif text-xl font-semibold text-sky-900">
-                Boris Ceballos
