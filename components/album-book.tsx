@@ -54,12 +54,12 @@ const Cover = forwardRef<HTMLDivElement, PageProps>(function Cover(
 // Header reused on every inner leaf: shows the book title, not "Página N"
 function LeafHeader() {
   return (
-    <div className="mb-4 flex items-center justify-center gap-3 border-b border-accent/40 pb-3">
-      <span className="h-px w-8 bg-accent/60" />
-      <p className="font-serif text-sm uppercase tracking-[0.2em] text-primary">
+    <div className="mb-4 flex items-center justify-center gap-3 border-b border-amber-600/40 pb-3">
+      <span className="h-px w-8 bg-amber-600/60" />
+      <p className="font-serif text-sm uppercase tracking-[0.2em] text-amber-700">
         {BOOK_TITLE}
       </p>
-      <span className="h-px w-8 bg-accent/60" />
+      <span className="h-px w-8 bg-amber-600/60" />
     </div>
   )
 }
@@ -67,8 +67,8 @@ function LeafHeader() {
 // Footer reused on every inner leaf: shows the page number
 function LeafFooter({ pageNumber }: { pageNumber: number }) {
   return (
-    <div className="mt-3 border-t border-accent/30 pt-2 text-center">
-      <p className="text-xs text-muted-foreground">{pageNumber}</p>
+    <div className="mt-3 border-t border-amber-600/30 pt-2 text-center">
+      <p className="text-xs text-neutral-500">{pageNumber}</p>
     </div>
   )
 }
@@ -80,7 +80,7 @@ const BlankPageContent = forwardRef<HTMLDivElement, { label?: string }>(
         ref={ref}
         className="album-leaf flex h-full w-full items-center justify-center"
       >
-        <p className="text-xs italic text-muted-foreground/60">
+        <p className="text-xs italic text-neutral-400">
           {label ?? ''}
         </p>
       </div>
@@ -93,17 +93,17 @@ function IntroContent() {
     <div className="flex h-full flex-col p-7 sm:p-8">
       <LeafHeader />
       <div className="flex-1 overflow-y-auto">
-        <h3 className="font-serif text-xl font-bold text-foreground text-balance">
+        <h3 className="font-serif text-xl font-bold text-neutral-900 text-balance">
           Introducción
         </h3>
-        <p className="mt-1 font-serif text-base italic text-primary">
+        <p className="mt-1 font-serif text-base italic text-amber-700">
           {INTRO_SUBTITULO}
         </p>
         <div className="mt-4 space-y-3">
           {INTRO_PARRAFOS.map((p, i) => (
             <p
               key={i}
-              className="text-justify text-sm leading-relaxed text-foreground"
+              className="text-justify text-sm leading-relaxed text-neutral-900"
             >
               {p}
             </p>
@@ -125,21 +125,21 @@ function GlossaryContent({
     <div className="flex h-full flex-col p-7 sm:p-8">
       <LeafHeader />
       <div className="flex-1 overflow-y-auto">
-        <h3 className="font-serif text-xl font-bold text-foreground">
+        <h3 className="font-serif text-xl font-bold text-neutral-900">
           Glosario
         </h3>
-        <p className="mt-1 text-sm italic text-muted-foreground">
+        <p className="mt-1 text-sm italic text-neutral-500">
           Quienes dejaron su huella en estas páginas
         </p>
         <ul className="mt-4 space-y-2">
           {entries.map((entry, i) => (
             <li
               key={entry.id}
-              className="flex items-baseline gap-2 text-sm text-foreground"
+              className="flex items-baseline gap-2 text-sm text-neutral-900"
             >
               <span className="font-medium">{entry.nombre}</span>
-              <span className="flex-1 translate-y-[-3px] border-b border-dotted border-muted-foreground/40" />
-              <span className="tabular-nums text-muted-foreground">
+              <span className="flex-1 translate-y-[-3px] border-b border-dotted border-neutral-400" />
+              <span className="tabular-nums text-neutral-500">
                 {startPage + i}
               </span>
             </li>
@@ -170,7 +170,7 @@ function EntryContent({
           type="button"
           onClick={() => onDelete?.(entry.id)}
           disabled={deleting}
-          className="absolute right-3 top-3 z-10 flex items-center gap-1 rounded-full border border-destructive/30 bg-card/90 px-2.5 py-1 text-xs font-medium text-destructive shadow-sm transition-colors hover:bg-destructive hover:text-card disabled:opacity-50"
+          className="absolute right-3 top-3 z-10 flex items-center gap-1 rounded-full border border-red-300 bg-white/90 px-2.5 py-1 text-xs font-medium text-red-600 shadow-sm transition-colors hover:bg-red-600 hover:text-white disabled:opacity-50"
           aria-label={`Eliminar la página de ${entry.nombre}`}
         >
           {deleting ? (
@@ -183,7 +183,7 @@ function EntryContent({
       )}
       <LeafHeader />
       <div className="flex-1 overflow-y-auto">
-        <h3 className="mb-3 font-serif text-lg font-semibold text-foreground">
+        <h3 className="mb-3 font-serif text-lg font-semibold text-neutral-900">
           {entry.nombre}
         </h3>
         <p
@@ -203,18 +203,18 @@ function EntryContent({
                 key={p}
                 src={fileUrl(p) || '/placeholder.svg'}
                 alt={`Foto de ${entry.nombre}`}
-                className="aspect-square w-full rounded-md border border-border object-cover"
+                className="aspect-square w-full rounded-md border border-neutral-200 object-cover"
               />
             ))}
           </div>
         )}
       </div>
       {/* Sender signature */}
-      <div className="mt-4 border-t border-accent/40 pt-3 text-right">
-        <p className="text-xs uppercase tracking-wider text-muted-foreground">
+      <div className="mt-4 border-t border-amber-600/40 pt-3 text-right">
+        <p className="text-xs uppercase tracking-wider text-neutral-500">
           De parte de
         </p>
-        <p className="font-serif text-lg italic text-foreground">
+        <p className="font-serif text-lg italic text-neutral-900">
           {entry.nombre}
         </p>
       </div>
@@ -374,7 +374,7 @@ export function AlbumBook({
         <button
           type="button"
           onClick={flipPrev}
-          className="flex items-center gap-1 rounded-full border border-border bg-card px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-secondary"
+          className="flex items-center gap-1 rounded-full border border-neutral-300 bg-white px-4 py-2 text-sm font-medium text-neutral-800 transition-colors hover:bg-neutral-100"
         >
           <ChevronLeft className="size-4" />
           Anterior
@@ -382,13 +382,13 @@ export function AlbumBook({
         <button
           type="button"
           onClick={flipNext}
-          className="flex items-center gap-1 rounded-full border border-border bg-card px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-secondary"
+          className="flex items-center gap-1 rounded-full border border-neutral-300 bg-white px-4 py-2 text-sm font-medium text-neutral-800 transition-colors hover:bg-neutral-100"
         >
           Siguiente
           <ChevronRight className="size-4" />
         </button>
       </div>
-      <p className="text-xs text-muted-foreground">
+      <p className="text-xs text-neutral-500">
         Arrastra las esquinas de las hojas para pasar las páginas.
       </p>
     </div>
