@@ -9,7 +9,6 @@ import dynamic from 'next/dynamic'
 import { useRouter } from 'next/navigation'
 import { forwardRef, useEffect, useRef, useState, useTransition } from 'react'
 
-// react-pageflip touches the DOM, so load it client-side only
 const HTMLFlipBook = dynamic(() => import('react-pageflip'), { ssr: false })
 
 function fileUrl(pathname: string) {
@@ -21,7 +20,89 @@ type PageProps = {
   className?: string
 }
 
-// react-pageflip requires page components to forward a ref
+// ─── Decorative ornamental frame ────────────────────────────────────────────
+function DecorativeFrame() {
+  return (
+    <svg
+      className="pointer-events-none absolute inset-0 h-full w-full"
+      viewBox="0 0 300 400"
+      preserveAspectRatio="none"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      {/* Double border */}
+      <rect x="8"  y="8"  width="284" height="384" stroke="#9B7320" strokeWidth="0.9" />
+      <rect x="13" y="13" width="274" height="374" stroke="#9B7320" strokeWidth="0.3" />
+
+      {/* ── TOP ORNAMENT (centered at x=150, y=8) ── */}
+      {/* Central bud */}
+      <path d="M150,4 C148,1 145,0 150,0 C155,0 152,1 150,4Z" fill="#9B7320"/>
+      {/* Small loops flanking bud */}
+      <path d="M146,8 C144,5.5 144,3.5 147,5 C149,6 150,8 150,8 C150,8 151,6 153,5 C156,3.5 156,5.5 154,8"
+            stroke="#9B7320" strokeWidth="0.7" />
+      {/* Left tendril */}
+      <path d="M144,8.5 C128,4.5 112,12 97,8.5 C82,5 72,12.5 57,9.5 C48,7.5 42,12 36,9"
+            stroke="#9B7320" strokeWidth="1" strokeLinecap="round"/>
+      {/* Left end curl */}
+      <path d="M36,9 C30,5.5 27,12 33,14 C37,15.5 40,11 36,9" stroke="#9B7320" strokeWidth="0.8"/>
+      {/* Left accent circle */}
+      <circle cx="97" cy="8.5" r="2.2" fill="#9B7320"/>
+      {/* Right tendril */}
+      <path d="M156,8.5 C172,4.5 188,12 203,8.5 C218,5 228,12.5 243,9.5 C252,7.5 258,12 264,9"
+            stroke="#9B7320" strokeWidth="1" strokeLinecap="round"/>
+      {/* Right end curl */}
+      <path d="M264,9 C270,5.5 273,12 267,14 C263,15.5 260,11 264,9" stroke="#9B7320" strokeWidth="0.8"/>
+      {/* Right accent circle */}
+      <circle cx="203" cy="8.5" r="2.2" fill="#9B7320"/>
+
+      {/* ── BOTTOM ORNAMENT (mirrored) ── */}
+      <path d="M150,396 C148,399 145,400 150,400 C155,400 152,399 150,396Z" fill="#9B7320"/>
+      <path d="M146,392 C144,394.5 144,396.5 147,395 C149,394 150,392 150,392 C150,392 151,394 153,395 C156,396.5 156,394.5 154,392"
+            stroke="#9B7320" strokeWidth="0.7"/>
+      {/* Left tendril bottom */}
+      <path d="M144,391.5 C128,395.5 112,388 97,391.5 C82,395 72,387.5 57,390.5 C48,392.5 42,388 36,391"
+            stroke="#9B7320" strokeWidth="1" strokeLinecap="round"/>
+      <path d="M36,391 C30,394.5 27,388 33,386 C37,384.5 40,389 36,391" stroke="#9B7320" strokeWidth="0.8"/>
+      <circle cx="97" cy="391.5" r="2.2" fill="#9B7320"/>
+      {/* Right tendril bottom */}
+      <path d="M156,391.5 C172,395.5 188,388 203,391.5 C218,395 228,387.5 243,390.5 C252,392.5 258,388 264,391"
+            stroke="#9B7320" strokeWidth="1" strokeLinecap="round"/>
+      <path d="M264,391 C270,394.5 273,388 267,386 C263,384.5 260,389 264,391" stroke="#9B7320" strokeWidth="0.8"/>
+      <circle cx="203" cy="391.5" r="2.2" fill="#9B7320"/>
+    </svg>
+  )
+}
+
+// ─── Page spine shadow (visible in landscape/two-page mode) ─────────────────
+function Spine() {
+  return (
+    <div
+      className="pointer-events-none absolute inset-y-0 left-1/2 z-30 -translate-x-1/2"
+      style={{
+        width: '6px',
+        background:
+          'linear-gradient(to right, rgba(0,0,0,0.18) 0%, rgba(0,0,0,0.06) 40%, rgba(255,255,255,0.1) 50%, rgba(0,0,0,0.06) 60%, rgba(0,0,0,0.18) 100%)',
+        boxShadow: '-4px 0 12px rgba(0,0,0,0.15), 4px 0 12px rgba(0,0,0,0.15)',
+      }}
+    />
+  )
+}
+
+// ─── Paper background style ──────────────────────────────────────────────────
+const paperStyle: React.CSSProperties = {
+  backgroundColor: '#fdf8ef',
+  backgroundImage:
+    'radial-gradient(ellipse at 20% 20%, rgba(245,230,195,0.35) 0%, transparent 60%),' +
+    'radial-gradient(ellipse at 80% 80%, rgba(230,215,180,0.25) 0%, transparent 60%)',
+}
+
+// ─── Shared scrollbar style ──────────────────────────────────────────────────
+const scrollbarStyle: React.CSSProperties = {
+  scrollbarWidth: 'thin',
+  scrollbarColor: '#c8a84b transparent',
+}
+
+// ─── Page wrapper ────────────────────────────────────────────────────────────
 const Page = forwardRef<HTMLDivElement, PageProps>(function Page(
   { children, className = '' },
   ref,
@@ -29,8 +110,10 @@ const Page = forwardRef<HTMLDivElement, PageProps>(function Page(
   return (
     <div
       ref={ref}
-      className={`album-leaf flex h-full w-full flex-col overflow-hidden ${className}`}
+      className={`album-leaf relative flex h-full w-full flex-col overflow-hidden ${className}`}
+      style={paperStyle}
     >
+      <DecorativeFrame />
       {children}
     </div>
   )
@@ -51,7 +134,7 @@ const Cover = forwardRef<HTMLDivElement, PageProps>(function Cover(
   )
 })
 
-// Header reused on every inner leaf: shows the book title, not "Página N"
+// ─── Shared inner-page header ────────────────────────────────────────────────
 function LeafHeader() {
   return (
     <div className="mb-4 flex items-center justify-center gap-3 border-b border-amber-600/40 pb-3">
@@ -64,7 +147,6 @@ function LeafHeader() {
   )
 }
 
-// Footer reused on every inner leaf: shows the page number
 function LeafFooter({ pageNumber }: { pageNumber: number }) {
   return (
     <div className="mt-3 border-t border-amber-600/30 pt-2 text-center">
@@ -73,14 +155,17 @@ function LeafFooter({ pageNumber }: { pageNumber: number }) {
   )
 }
 
+// ─── Blank separator page ────────────────────────────────────────────────────
 const BlankPageContent = forwardRef<HTMLDivElement, { label?: string }>(
   function BlankPageContent({ label }, ref) {
     return (
       <div
         ref={ref}
-        className="album-leaf flex h-full w-full items-center justify-center"
+        className="album-leaf relative flex h-full w-full items-center justify-center"
+        style={paperStyle}
       >
-        <p className="text-xs italic text-neutral-400">
+        <DecorativeFrame />
+        <p className="relative z-10 text-xs italic text-neutral-400">
           {label ?? ''}
         </p>
       </div>
@@ -88,11 +173,15 @@ const BlankPageContent = forwardRef<HTMLDivElement, { label?: string }>(
   },
 )
 
+// ─── Introduction page ───────────────────────────────────────────────────────
 function IntroContent() {
   return (
-    <div className="flex h-full flex-col p-7 sm:p-8">
+    <div className="relative z-10 flex h-full flex-col p-8 sm:p-9">
       <LeafHeader />
-      <div className="flex-1 overflow-y-auto">
+      <div
+        className="flex-1 overflow-y-auto pr-4"
+        style={scrollbarStyle}
+      >
         <h3 className="font-serif text-xl font-bold text-neutral-900 text-balance">
           Introducción
         </h3>
@@ -114,6 +203,7 @@ function IntroContent() {
   )
 }
 
+// ─── Glossary page ───────────────────────────────────────────────────────────
 function GlossaryContent({
   entries,
   startPage,
@@ -122,9 +212,12 @@ function GlossaryContent({
   startPage: number
 }) {
   return (
-    <div className="flex h-full flex-col p-7 sm:p-8">
+    <div className="relative z-10 flex h-full flex-col p-8 sm:p-9">
       <LeafHeader />
-      <div className="flex-1 overflow-y-auto">
+      <div
+        className="flex-1 overflow-y-auto pr-4"
+        style={scrollbarStyle}
+      >
         <h3 className="font-serif text-xl font-bold text-neutral-900">
           Glosario
         </h3>
@@ -150,6 +243,7 @@ function GlossaryContent({
   )
 }
 
+// ─── Entry page ──────────────────────────────────────────────────────────────
 function EntryContent({
   entry,
   pageNumber,
@@ -164,13 +258,13 @@ function EntryContent({
   deleting?: boolean
 }) {
   return (
-    <div className="relative flex h-full flex-col p-7 sm:p-8">
+    <div className="relative z-10 flex h-full flex-col p-8 sm:p-9">
       {canDelete && (
         <button
           type="button"
           onClick={() => onDelete?.(entry.id)}
           disabled={deleting}
-          className="absolute right-3 top-3 z-10 flex items-center gap-1 rounded-full border border-red-300 bg-white/90 px-2.5 py-1 text-xs font-medium text-red-600 shadow-sm transition-colors hover:bg-red-600 hover:text-white disabled:opacity-50"
+          className="absolute right-4 top-4 z-20 flex items-center gap-1 rounded-full border border-red-300 bg-white/90 px-2.5 py-1 text-xs font-medium text-red-600 shadow-sm transition-colors hover:bg-red-600 hover:text-white disabled:opacity-50"
           aria-label={`Eliminar la página de ${entry.nombre}`}
         >
           {deleting ? (
@@ -182,7 +276,10 @@ function EntryContent({
         </button>
       )}
       <LeafHeader />
-      <div className="flex-1 overflow-y-auto">
+      <div
+        className="flex-1 overflow-y-auto pr-4"
+        style={scrollbarStyle}
+      >
         <h3 className="mb-3 font-serif text-lg font-semibold text-neutral-900">
           {entry.nombre}
         </h3>
@@ -203,13 +300,12 @@ function EntryContent({
                 key={p}
                 src={fileUrl(p) || '/placeholder.svg'}
                 alt={`Foto de ${entry.nombre}`}
-                className="aspect-square w-full rounded-md border border-neutral-200 object-cover"
+                className="aspect-square w-full rounded-md border border-amber-200/60 object-cover"
               />
             ))}
           </div>
         )}
       </div>
-      {/* Sender signature */}
       <div className="mt-4 border-t border-amber-600/40 pt-3 text-right">
         <p className="text-xs uppercase tracking-wider text-neutral-500">
           De parte de
@@ -223,6 +319,7 @@ function EntryContent({
   )
 }
 
+// ─── Main AlbumBook component ─────────────────────────────────────────────────
 export function AlbumBook({
   entries,
   canDelete = false,
@@ -243,7 +340,6 @@ export function AlbumBook({
     function update() {
       const isMobile = window.innerWidth < 768
       const available = window.innerWidth - 56
-      // Two-page spread on desktop, single page on mobile.
       const width = isMobile
         ? Math.min(440, Math.max(280, available))
         : Math.min(440, Math.max(300, Math.floor(available / 2)))
@@ -263,9 +359,7 @@ export function AlbumBook({
   }
 
   function handleDelete(id: number) {
-    if (!window.confirm('¿Seguro que deseas eliminar esta página del álbum?')) {
-      return
-    }
+    if (!window.confirm('¿Seguro que deseas eliminar esta página del álbum?')) return
     setDeletingId(id)
     startTransition(async () => {
       await deleteEntry(id)
@@ -276,7 +370,11 @@ export function AlbumBook({
 
   return (
     <div className="flex flex-col items-center gap-6">
-      <div className="book-mount">
+      {/* Book mount — relative so the spine overlay can be positioned inside */}
+      <div className="book-mount relative">
+        {/* Center spine divider (desktop two-page mode only) */}
+        {!portrait && <Spine />}
+
         {/* @ts-expect-error react-pageflip types are loose */}
         <HTMLFlipBook
           key={portrait ? 'portrait' : 'landscape'}
@@ -326,7 +424,7 @@ export function AlbumBook({
             </div>
           </Cover>
 
-          {/* Blank page between cover and introduction */}
+          {/* Blank page after front cover */}
           <BlankPageContent />
 
           {/* Introduction */}
@@ -334,12 +432,12 @@ export function AlbumBook({
             <IntroContent />
           </Page>
 
-          {/* Glossary of participants and their page numbers */}
+          {/* Glossary */}
           <Page>
             <GlossaryContent entries={entries} startPage={1} />
           </Page>
 
-          {/* Blank page between introduction/glossary and the entries */}
+          {/* Blank page before entries */}
           <BlankPageContent />
 
           {/* Entries */}
@@ -370,11 +468,12 @@ export function AlbumBook({
         </HTMLFlipBook>
       </div>
 
+      {/* Navigation buttons */}
       <div className="flex items-center gap-4">
         <button
           type="button"
           onClick={flipPrev}
-          className="flex items-center gap-1 rounded-full border border-neutral-300 bg-white px-4 py-2 text-sm font-medium text-neutral-800 transition-colors hover:bg-neutral-100"
+          className="flex items-center gap-1 rounded-full border border-amber-300 bg-amber-50 px-4 py-2 text-sm font-medium text-neutral-800 transition-colors hover:bg-amber-100"
         >
           <ChevronLeft className="size-4" />
           Anterior
@@ -382,7 +481,7 @@ export function AlbumBook({
         <button
           type="button"
           onClick={flipNext}
-          className="flex items-center gap-1 rounded-full border border-neutral-300 bg-white px-4 py-2 text-sm font-medium text-neutral-800 transition-colors hover:bg-neutral-100"
+          className="flex items-center gap-1 rounded-full border border-amber-300 bg-amber-50 px-4 py-2 text-sm font-medium text-neutral-800 transition-colors hover:bg-amber-100"
         >
           Siguiente
           <ChevronRight className="size-4" />
