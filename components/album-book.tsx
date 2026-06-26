@@ -301,14 +301,6 @@ function EntryContent({
           </div>
         )}
       </div>
-      <div className="mt-4 border-t border-amber-600/40 pt-3 text-right">
-        <p className="text-xs uppercase tracking-wider text-neutral-500">
-          De parte de
-        </p>
-        <p className="font-serif text-lg italic text-neutral-900">
-          {entry.nombre}
-        </p>
-      </div>
       <LeafFooter pageNumber={pageNumber} />
     </div>
   )
@@ -402,89 +394,3 @@ export function AlbumBook({
               </p>
               <p className="font-serif text-xl font-semibold text-sky-900">
                 Boris Ceballos
-              </p>
-              <div className="mt-3 flex items-center gap-2">
-                <span className="h-px w-8 bg-amber-600/70" />
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src="/portada-jubilacion.png"
-                  alt="Ilustración de un libro abierto con una pluma"
-                  className="cover-image-frame mx-auto my-1 aspect-square w-44 rounded-lg object-cover sm:w-52"
-                />
-                <span className="h-px w-8 bg-amber-600/70" />
-              </div>
-              <p className="mt-4 max-w-[16rem] text-sm italic leading-relaxed text-sky-900/80 text-pretty">
-                Mensajes y recuerdos de quienes te acompañaron en este camino.
-              </p>
-            </div>
-          </Cover>
-
-          {/* Blank page after front cover */}
-          <BlankPageContent />
-
-          {/* Introduction */}
-          <Page>
-            <IntroContent />
-          </Page>
-
-          {/* Glossary */}
-          <Page>
-            <GlossaryContent entries={entries} startPage={1} />
-          </Page>
-
-          {/* Blank page before entries */}
-          <BlankPageContent />
-
-          {/* Entries */}
-          {entries.map((entry, i) => (
-            <Page key={entry.id}>
-              <EntryContent
-                entry={entry}
-                pageNumber={i + 1}
-                canDelete={canDelete}
-                onDelete={handleDelete}
-                deleting={isPending && deletingId === entry.id}
-              />
-            </Page>
-          ))}
-
-          {/* Back cover */}
-          <Cover>
-            <div className="flex h-full flex-col items-center justify-center p-10 text-center">
-              <h2 className="font-serif text-2xl font-bold text-sky-950">
-                ¡Feliz jubilación!
-              </h2>
-              <div className="mt-3 h-px w-12 bg-amber-600/70" />
-              <p className="mt-4 text-sm italic text-sky-900/80 text-pretty">
-                Gracias por tantos años de dedicación.
-              </p>
-            </div>
-          </Cover>
-        </HTMLFlipBook>
-      </div>
-
-      {/* Navigation buttons */}
-      <div className="flex items-center gap-4">
-        <button
-          type="button"
-          onClick={flipPrev}
-          className="flex items-center gap-1 rounded-full border border-amber-300 bg-amber-50 px-4 py-2 text-sm font-medium text-neutral-800 transition-colors hover:bg-amber-100"
-        >
-          <ChevronLeft className="size-4" />
-          Anterior
-        </button>
-        <button
-          type="button"
-          onClick={flipNext}
-          className="flex items-center gap-1 rounded-full border border-amber-300 bg-amber-50 px-4 py-2 text-sm font-medium text-neutral-800 transition-colors hover:bg-amber-100"
-        >
-          Siguiente
-          <ChevronRight className="size-4" />
-        </button>
-      </div>
-      <p className="text-xs text-neutral-500">
-        Arrastra las esquinas de las hojas para pasar las páginas.
-      </p>
-    </div>
-  )
-}
