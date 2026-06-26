@@ -23,6 +23,7 @@ import {
   Trash2,
 } from 'lucide-react'
 import Image from 'next/image'
+import { useRouter } from 'next/navigation'
 import { useEffect, useRef, useState, useTransition } from 'react'
 
 function fileUrl(pathname: string) {
@@ -35,10 +36,10 @@ export function MessageEditor({ entry }: { entry: Entry }) {
   const [font, setFont] = useState(entry.font ?? FONT_DEFAULT)
   const [fotos, setFotos] = useState<string[]>(entry.fotos ?? [])
   const [uploading, setUploading] = useState(false)
-  const [status, setStatus] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [isSaving, startSaving] = useTransition()
   const [frase, setFrase] = useState(FRASES_JUBILACION[0])
+  const router = useRouter()
   const inputRef = useRef<HTMLInputElement>(null)
 
   // Randomize the phrase only on the client to avoid SSR hydration mismatch.
@@ -85,7 +86,6 @@ export function MessageEditor({ entry }: { entry: Entry }) {
   }
 
   function handleSave() {
-    setStatus(null)
     setError(null)
     startSaving(async () => {
       const fd = new FormData()
@@ -95,7 +95,7 @@ export function MessageEditor({ entry }: { entry: Entry }) {
       fd.append('font', font)
       const result = await saveMessage(fd)
       if (result?.error) setError(result.error)
-      else setStatus('Tu mensaje se guardó correctamente.')
+      else router.push('/escribir/preview')
     })
   }
 
@@ -273,11 +273,6 @@ export function MessageEditor({ entry }: { entry: Entry }) {
       {error && (
         <p className="text-sm text-destructive" role="alert">
           {error}
-        </p>
-      )}
-      {status && (
-        <p className="text-sm text-primary" role="status">
-          {status}
         </p>
       )}
 
