@@ -83,6 +83,7 @@ export async function saveMessage(formData: FormData) {
     .where(eq(entries.id, id))
 
   revalidatePath('/escribir')
+  revalidatePath('/escribir/preview')
   return { success: true }
 }
 
