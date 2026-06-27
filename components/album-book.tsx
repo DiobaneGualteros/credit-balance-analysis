@@ -203,7 +203,7 @@ function GlossaryContent({
   entries,
   startPage,
 }: {
-  entries: Entry[]
+  entries: { id: number; nombre: string }[]
   startPage: number
 }) {
   return (
@@ -310,9 +310,13 @@ function EntryContent({
 export function AlbumBook({
   entries,
   canDelete = false,
+  previewEntryId,
+  glossaryEntries,
 }: {
   entries: Entry[]
   canDelete?: boolean
+  previewEntryId?: number
+  glossaryEntries?: { id: number; nombre: string }[]
 }) {
   const router = useRouter()
   const bookRef = useRef<{
@@ -421,19 +425,21 @@ export function AlbumBook({
 
           {/* Glossary */}
           <Page>
-            <GlossaryContent entries={entries} startPage={1} />
+            <GlossaryContent entries={glossaryEntries ?? entries} startPage={1} />
           </Page>
 
           {/* Blank page before entries */}
           <BlankPageContent />
 
           {/* Entries */}
-          {entries.map((entry, i) => (
+          {entries
+            .filter((e) => !previewEntryId || e.id === previewEntryId)
+            .map((entry, i) => (
             <Page key={entry.id}>
               <EntryContent
                 entry={entry}
                 pageNumber={i + 1}
-                canDelete={canDelete}
+                canDelete={canDelete && !previewEntryId}
                 onDelete={handleDelete}
                 deleting={isPending && deletingId === entry.id}
               />
